@@ -37,7 +37,7 @@ def parse_arguments():
     parser.add_argument("--loss", type=str, default="cross_entropy",choices=["cross_entropy", "mse"])
     parser.add_argument("--weight_init", type=str, default="xavier",choices=["xavier", "random"])
     parser.add_argument("--wandb_project", type=str, default="dl_assignment")
-    parser.add_argument("--model_save_path", type=str, default="models/model.pkl")
+    parser.add_argument("--model_save_path", type=str, default="models/model")
     return parser.parse_args()
 
 def load_model(model_path):
