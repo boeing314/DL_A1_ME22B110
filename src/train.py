@@ -5,6 +5,7 @@ Entry point for training neural networks with command-line arguments
 from utils.data_loader import load_data
 from ann.neural_network import NeuralNetwork
 import argparse
+import numpy as np
 
 def parse_arguments():
     """
@@ -39,20 +40,39 @@ def parse_arguments():
     parser.add_argument("--model_save_path", type=str, default="models/model.pkl")
     return parser.parse_args()
 
+def load_model(model_path):
+    data = np.load(model_path, allow_pickle=True).item()
+    return data
+    
 
+import os
 
 def main():
-    """
-    Main training function.
-    """
     args = parse_arguments()
+
     dataset = getattr(args, "dataset", "mnist")
     loaded_data = load_data(dataset)
+
     epochs = getattr(args, "epochs", 10)
     batch_size = getattr(args, "batch_size", 32)
+
+    model_save_path = getattr(args, "model_save_path", "src/best_model.npy")
+
     X_train, y_train, X_test, y_test = loaded_data
+
     model = NeuralNetwork(args)
+
     model.train(X_train, y_train, epochs=epochs, batch_size=batch_size)
+
+    best_weights = model.get_weights()
+
+    if not model_save_path.endswith(".npy"):
+        model_save_path += ".npy"
+
+    os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
+
+    np.save(model_save_path, best_weights)
+
     print("Training complete")
 
 
