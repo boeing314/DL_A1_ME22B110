@@ -55,6 +55,23 @@ class NeuralNetwork:
             self.layers.append(neural_layer.NeuralLayer(self.hidden_size[i], self.hidden_size[i+1], self.weight_init))
             self.activations.append(self.activation_map[self.activation]())
         self.layers.append(neural_layer.NeuralLayer(self.hidden_size[-1], self.output_size, self.weight_init))
+    
+    def get_weights(self):
+        weights = {}
+
+        for i, layer in enumerate(self.layers):
+            weights[f"W{i+1}"] = layer.W
+            weights[f"b{i+1}"] = layer.b
+
+        return weights
+
+    def set_weights(self, weights):
+        for i, layer in enumerate(self.layers):
+            if f"W{i+1}" not in weights:
+                raise ValueError("Missing weights for layer", i+1)
+
+            layer.W = weights[f"W{i+1}"]
+            layer.b = weights[f"b{i+1}"]
     def forward(self, X):
         """
         Forward propagation through all layers.
