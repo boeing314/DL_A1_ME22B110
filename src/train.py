@@ -37,7 +37,7 @@ def parse_arguments():
     parser.add_argument("--loss", type=str, default="cross_entropy",choices=["cross_entropy", "mse"])
     parser.add_argument("--weight_init", type=str, default="xavier",choices=["xavier", "random"])
     parser.add_argument("--wandb_project", type=str, default="dl_assignment")
-    parser.add_argument("--model_save_path", type=str, default="src/best_model")
+    parser.add_argument("--model_save_path", type=str, default="src/best_model.npy")
     return parser.parse_args()
 
 def load_model(model_path):
@@ -69,7 +69,10 @@ def main():
     if not model_save_path.endswith(".npy"):
         model_save_path += ".npy"
 
-    os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
+    dir_path = os.path.dirname(model_save_path)
+
+    if dir_path != "":
+        os.makedirs(dir_path, exist_ok=True)
 
     np.save(model_save_path, best_weights)
 
