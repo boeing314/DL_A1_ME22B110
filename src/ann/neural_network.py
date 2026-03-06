@@ -8,6 +8,7 @@ import ann.activations as activations
 import ann.objective_functions as objective_functions
 import ann.neural_layer as neural_layer
 import ann.optimizers as optimizers
+import wandb
 class NeuralNetwork:
     """
     Main model class that orchestrates the neural network training and inference.
@@ -29,6 +30,7 @@ class NeuralNetwork:
         self.activation = getattr(cli_args, "activation", "relu")
         self.weight_init = getattr(cli_args, "weight_init", "xavier")
         self.wandb_project = getattr(cli_args, "wandb_project", "dl_assignment")
+        self.wandb_run_name = getattr(cli_args, "wandb_run_name", "run_test")
         self.model_save_path = getattr(cli_args, "model_save_path", "src/best_model.npy")
 
         self.input_size = 784  
@@ -134,6 +136,7 @@ class NeuralNetwork:
                 self.backward(y_batch, y_pred)
                 self.update_weights()
             print(f"Loss: {avg_loss:.4f}")
+            wandb.log({"epoch": epoch+1, "loss": avg_loss})
 
     def evaluate(self, X, y):
         logits=self.forward(X)

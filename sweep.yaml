@@ -1,23 +1,19 @@
-program: src/train.py
-
-method: bayes
+method: random
 
 metric:
-  name: f1
+  name: val_f1
   goal: maximize
 
 parameters:
 
+  optimizer:
+    values: ["sgd", "momentum", "nag", "rmsprop"]
+
   learning_rate:
-    distribution: log_uniform_values
-    min: 0.0001
-    max: 0.01
+    values: [0.1, 0.01, 0.001]
 
   batch_size:
     values: [32, 64, 128]
-
-  optimizer:
-    values: ["sgd", "momentum", "nag", "rmsprop"]
 
   activation:
     values: ["relu", "tanh", "sigmoid"]

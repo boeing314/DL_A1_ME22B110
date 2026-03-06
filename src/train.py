@@ -6,6 +6,8 @@ from utils.data_loader import load_data
 from ann.neural_network import NeuralNetwork
 import argparse
 import numpy as np
+import os
+import wandb
 
 def parse_arguments():
     """
@@ -37,7 +39,8 @@ def parse_arguments():
     parser.add_argument("-sz","--hidden_size", type=int, nargs="+", default=[128,128])
     parser.add_argument("-a","--activation", type=str, default="relu",choices=["relu", "sigmoid", "tanh"])
     parser.add_argument("-w_i","--weight_init", type=str, default="xavier",choices=["xavier", "random"])
-    parser.add_argument("-w_p","--wandb_project", type=str, default="dl_assignment")
+    parser.add_argument("-w_p","--wandb_project", type=str, default="test_project")
+    parser.add_argument("-w_rn","--wandb_run_name", type=str, default="run_test")
     parser.add_argument("-msp","--model_save_path", type=str, default="src/best_model.npy")
     
     return parser.parse_args()
@@ -47,28 +50,34 @@ def load_model(model_path):
     return data
     
 
-import os
+
 
 def main():
     args = parse_arguments()
 
+    wandb.init(project=args.wandb_project, name=args.wandb_run_name,config=vars(args))
     dataset = getattr(args, "dataset")
     model_save_path = getattr(args, "model_save_path", "sample_model.npy")
 
-    X_train, y_train, X_test, y_test = load_data(dataset)
+    X_train, y_train, X_val, y_val = load_data(dataset)
 
     model = NeuralNetwork(args)
 
     model.train(X_train, y_train)
 
-    best_weights = model.get_weights()
+   val_metrics = model.evaluate(X_val, y_val)
+
+    
+    wandb.log({"val_loss": val_metrics["loss"], "val_accuracy": val_metrics["accuracy"], "val_precision": val_metrics["precision"], "val_recall": val_metrics["recall"], "val_f1": val_metrics["f1"]})
+
+    weights = model.get_weights()
 
     if not model_save_path.endswith(".npy"):
         model_save_path += ".npy"
     dir_path = os.path.dirname(model_save_path)
     if dir_path != "":
         os.makedirs(dir_path, exist_ok=True)
-    np.save(model_save_path, best_weights)
+    np.save(model_save_path, weights)
 
     print("Training complete")
 
