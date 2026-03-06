@@ -22,7 +22,9 @@ class cross_entropy:
         y_true : labels (B,) or one-hot (B, C)
         """
 
-
+        # Convert integer labels to one-hot if needed
+        if y_true.ndim == 1:
+            y_true = np.eye(y_pred.shape[1])[y_true]
 
         # Numerical stability trick
         shifted_logits = y_pred - np.max(y_pred, axis=1, keepdims=True)
@@ -45,6 +47,8 @@ class cross_entropy:
         """
 
         # Convert integer labels to one-hot if needed
+        if y_true.ndim == 1:
+            y_true = np.eye(y_pred.shape[1])[y_true]
 
         shifted_logits = y_pred - np.max(y_pred, axis=1, keepdims=True)
 
