@@ -11,7 +11,7 @@ def parse_arguments():
     parser.add_argument("--dataset", type=str, default="mnist",
                         choices=["mnist", "fashion_mnist"])
 
-    parser.add_argument("--model_path", type=str, default="best_model.npy")
+    parser.add_argument("--model_path", type=str, default="src/best_model.npy")
 
     parser.add_argument("--num_layers", type=int, default=2)
     parser.add_argument("--hidden_size", type=int, nargs="+", default=[128,128])
