@@ -59,7 +59,6 @@ class NeuralNetwork:
 
     def forward(self, X):
 
-        # Handle different input shapes from autograder
         if X.ndim > 2:
             X = X.reshape(X.shape[0], -1)
 
@@ -67,9 +66,13 @@ class NeuralNetwork:
             X = self.layers[i].forward(X)
             X = self.activations[i].forward(X)
 
-        X = self.layers[-1].forward(X)
+        logits = self.layers[-1].forward(X)
 
-        return X
+        # softmax
+        exp_logits = np.exp(logits - np.max(logits, axis=1, keepdims=True))
+        probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
+
+        return probs
 
     def backward(self, y_true, y_pred):
         """
