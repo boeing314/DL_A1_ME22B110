@@ -8,89 +8,49 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 def parse_arguments():
 
-    parser = argparse.ArgumentParser(description="Evaluate trained model")
+    parser = argparse.ArgumentParser(description='Train a neural network')
+    parser.add_argument("-mlp","--model_load_path", type=str, default="src/best_model.npy")
+    parser.add_argument("-d","--dataset", type=str, default="mnist",choices=["mnist", "fashion_mnist"])
+    parser.add_argument("-b","--batch_size", type=int, default=32)
+    parser.add_argument("-nhl","--num_layers", type=int, default=2)
+    parser.add_argument("-sz","--hidden_size", type=int, nargs="+", default=[128,128])
+    parser.add_argument("-a","--activation", type=str, default="relu",choices=["relu", "sigmoid", "tanh"])
 
-    parser.add_argument("--dataset", type=str, default="mnist",
-                        choices=["mnist", "fashion_mnist"])
-
-    parser.add_argument("--model_path", type=str, default="src/best_model.npy")
-
-    parser.add_argument("--num_layers", type=int, default=2)
-
-    parser.add_argument("--hidden_size", type=str, default="[128,128]")
-
-    parser.add_argument("--activation", type=str, default="relu")
-
-    parser.add_argument("--loss", type=str, default="cross_entropy")
-
-    parser.add_argument("--weight_init", type=str, default="xavier")
-
-    args = parser.parse_args()
-
-    # Convert hidden_size string → list
-    args.hidden_size = ast.literal_eval(args.hidden_size)
-
-    # Ensure layer count matches hidden sizes
-    args.num_layers = len(args.hidden_size)
-
-    return args
+    return parser.parse_args()
 
 
 def load_model(model_path):
-
     weights = np.load(model_path, allow_pickle=True).item()
-
     return weights
+
+def evaluate_model(model, X_test, y_test): 
+    metrics = model.evaluate(X_test, y_test)
+    return metrics
 
 
 def main():
+    """
+    Main inference function.
 
+    TODO: Must return Dictionary - logits, loss, accuracy, f1, precision, recall
+    """
     args = parse_arguments()
-
-    # Load dataset
-    X_train, y_train, X_test, y_test = load_data(args.dataset)
-
-    # Build model
-    if X_test.ndim > 2:
-        X_test = X_test.reshape(X_test.shape[0], -1)
+    dataset = getattr(args, "dataset")
+    X_train, y_train, X_test, y_test = load_data(dataset)
     model = NeuralNetwork(args)
-
-    # Load trained weights
-    weights = load_model(args.model_path)
+    weights = load_model(args.model_load_path)
     model.set_weights(weights)
+    result = evaluate_model(model, X_test, y_test)
+    print("Evaluation complete!")
+    print(f"Logits: {result['logits']}")
+    print(f"Loss: {result['loss']:.4f}")
+    print(f"Accuracy: {result['accuracy']:.4f}")
+    print(f"Precision: {result['precision']:.4f}")
+    print(f"Recall: {result['recall']:.4f}")
+    print(f"F1 Score: {result['f1']:.4f}")
 
-    # Forward pass
-    logits = model.forward(X_test)
-
-    # Predicted labels
-    y_pred = np.argmax(logits, axis=1)
-
-    # Handle one-hot vs integer labels
-    if y_test.ndim > 1:
-        y_true = np.argmax(y_test, axis=1)
-    else:
-        y_true = y_test
-
-    # Metrics
-    acc = accuracy_score(y_true, y_pred)
-
-    precision = precision_score(
-        y_true, y_pred, average="macro", zero_division=0
-    )
-
-    recall = recall_score(
-        y_true, y_pred, average="macro", zero_division=0
-    )
-
-    f1 = f1_score(
-        y_true, y_pred, average="macro", zero_division=0
-    )
-
-    print("Accuracy :", acc)
-    print("Precision:", precision)
-    print("Recall   :", recall)
-    print("F1 Score :", f1)
+    return result
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

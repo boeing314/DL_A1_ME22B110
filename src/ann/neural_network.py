@@ -16,21 +16,23 @@ class NeuralNetwork:
     def __init__(self, cli_args):
         self.layers = []
         self.activations = []
-        self.objective_function = getattr(cli_args, "loss", "cross_entropy")
-        self.optimizer = getattr(cli_args, "optimizer", "sgd")
+
+        self.dataset = getattr(cli_args, "dataset", "mnist")
         self.epochs = getattr(cli_args, "epochs", 10)
         self.batch_size = getattr(cli_args, "batch_size", 32)
+        self.objective_function = getattr(cli_args, "loss", "cross_entropy")
+        self.optimizer = getattr(cli_args, "optimizer", "sgd")
         self.learning_rate = getattr(cli_args, "learning_rate", 0.01)
-        self.dataset = getattr(cli_args, "dataset", "mnist")
         self.weight_decay = getattr(cli_args, "weight_decay", 0)
         self.num_layers = getattr(cli_args, "num_layers", 2)
         self.hidden_size = getattr(cli_args, "hidden_size", [128,128])
         self.activation = getattr(cli_args, "activation", "relu")
         self.weight_init = getattr(cli_args, "weight_init", "xavier")
         self.wandb_project = getattr(cli_args, "wandb_project", "dl_assignment")
+        self.model_save_path = getattr(cli_args, "model_save_path", "src/best_model.npy")
 
-        self.input_size = 784  # For MNIST/Fashion-MNIST
-        self.output_size = 10  # For MNIST/Fashion-MNIST
+        self.input_size = 784  
+        self.output_size = 10 
 
         self.activation_map={
             'relu': activations.ReLU,
@@ -47,7 +49,7 @@ class NeuralNetwork:
             'momentum': optimizers.Momentum,
             'nag': optimizers.NAG,
             'rmsprop': optimizers.RMSProp}
-        self.optimizer_function=self.optimizer_map[self.optimizer](self.learning_rate)
+        self.optimizer_function=self.optimizer_map[self.optimizer](self.learning_rate,self.weight_decay)
         self.loss_function=self.objective_function_map[self.objective_function]()
         self.layers.append(neural_layer.NeuralLayer(self.input_size, self.hidden_size[0], self.weight_init))
         self.activations.append(self.activation_map[self.activation]())
@@ -59,11 +61,6 @@ class NeuralNetwork:
 
     def forward(self, X):
 
-        # Handle different input shapes from autograder
-        if X.ndim > 2:
-            X = X.reshape(X.shape[0], -1)
-        if X.max() > 1.2:
-            X = X / 255.0
         for i in range(len(self.layers)-1):
             X = self.layers[i].forward(X)
             X = self.activations[i].forward(X)
@@ -108,11 +105,13 @@ class NeuralNetwork:
             self.optimizer_function.update(self.layers[i])
 
     def train(self, X_train, y_train, epochs=1, batch_size=32):
+        epochs=self.epochs
+        batch_size=self.batch_size
         for epoch in range(epochs):
             loss_epoch=0
             total_samples=0
-            print(f"Epoch {epoch+1}/{epochs}")
-            # Shuffle data at the start of each epoch
+            print(f"Epoch {epoch+1}/{epochs}",end="    ")
+
             indices = np.arange(X_train.shape[0])
             np.random.shuffle(indices)
             X_train = X_train[indices]
@@ -134,11 +133,51 @@ class NeuralNetwork:
                 avg_loss = loss_epoch / total_samples
                 self.backward(y_batch, y_pred)
                 self.update_weights()
-            print(f"Epoch {epoch+1} Loss: {avg_loss:.4f}")
+            print(f"Loss: {avg_loss:.4f}")
 
     def evaluate(self, X, y):
-        y_pred = self.forward(X)
-        return self.loss_function.forward(y, y_pred)
+        logits=self.forward(X)
+        loss=self.loss_function.forward(y, logits)
+        y_pred=logits.copy()
+        y_pred=np.argmax(y_pred,axis=1)
+        if y.ndim>1:
+            y_true=np.argmax(y,axis=1)
+        else:
+            y_true=y
+        max_num=max(np.max(y_true), np.max(y_pred))
+        accuracy=np.mean(y_pred==y_true)
+        precision_i=[]
+        recall_i=[]
+        f1_i=[]
+        for i in range(max_num+1):
+            TP=np.sum((y_pred==i) & (y_true==i))
+            TN=np.sum((y_pred!=i) & (y_true!=i))
+            FP=np.sum((y_pred==i) & (y_true!=i))
+            FN=np.sum((y_pred!=i) & (y_true==i))
+            if TP+FP>0:
+                precision_i.append(TP/(TP+FP))
+            else:
+                precision_i.append(0)
+            if TP+FN>0:
+                recall_i.append(TP/(TP+FN))
+            else:
+                recall_i.append(0)
+            if precision_i[-1]+recall_i[-1]>0:
+                f1_i.append(2*precision_i[-1]*recall_i[-1]/(precision_i[-1]+recall_i[-1]))
+            else:
+                f1_i.append(0)
+        precision=np.mean(precision_i)
+        recall=np.mean(recall_i)
+        f1=np.mean(f1_i)
+        d={
+            "logits": logits,
+            "loss": loss,
+            "accuracy": accuracy,
+            "precision": precision,
+            "recall": recall,
+            "f1": f1}
+        return d
+        
 
     def get_weights(self):
         d = {}

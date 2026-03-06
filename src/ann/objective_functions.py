@@ -17,21 +17,12 @@ import numpy as np
 class cross_entropy:
 
     def forward(self, y_true, y_pred):
-        """
-        y_pred : logits (B, C)
-        y_true : labels (B,) or one-hot (B, C)
-        """
 
-        # Convert integer labels to one-hot if needed
         if y_true.ndim == 1:
             y_true = np.eye(y_pred.shape[1])[y_true]
 
-        # Numerical stability trick
-        shifted_logits = y_pred - np.max(y_pred, axis=1, keepdims=True)
-
-        exp_logits = np.exp(shifted_logits)
-        self.probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
-
+        exp_logits_shifted = np.exp(y_pred-np.max(y_pred, axis=1, keepdims=True))
+        self.probs = exp_logits_shifted / np.sum(exp_logits_shifted, axis=1, keepdims=True)
         self.y_true = y_true
 
         B = y_true.shape[0]
@@ -42,19 +33,12 @@ class cross_entropy:
 
 
     def backward(self, y_true, y_pred):
-        """
-        Gradient of loss w.r.t logits
-        """
 
-        # Convert integer labels to one-hot if needed
         if y_true.ndim == 1:
             y_true = np.eye(y_pred.shape[1])[y_true]
 
-        shifted_logits = y_pred - np.max(y_pred, axis=1, keepdims=True)
-
-        exp_logits = np.exp(shifted_logits)
-        self.probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
-
+        exp_logits_shifted = np.exp(y_pred-np.max(y_pred, axis=1, keepdims=True))
+        self.probs = exp_logits_shifted / np.sum(exp_logits_shifted, axis=1, keepdims=True)
         self.y_true = y_true
 
         B = y_true.shape[0]
