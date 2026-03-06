@@ -55,7 +55,7 @@ class NAG():
         layer.b=self.ori_b-self.v_b[layer_id]
 
 class RMSProp():
-    def __init__(self,lr=0.001,decay=0.9,weight_decay=0,eps=1e-8):
+    def __init__(self,lr=0.001,decay=0.7,weight_decay=0,eps=1e-8):
         self.lr=lr
         self.decay=decay
         self.weight_decay=weight_decay
