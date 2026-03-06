@@ -57,7 +57,24 @@ class NeuralNetwork:
         self.layers.append(neural_layer.NeuralLayer(self.hidden_size[-1], self.output_size, self.weight_init))
     
 
+    def get_weights(self):
+        weights = []
 
+        for layer in self.layers:
+            weights.append({
+                "W": layer.W,
+                "b": layer.b
+            })
+
+        return weights
+
+    def set_weights(self, weights):
+        if weights is None:
+            raise ValueError("Weights cannot be None")
+
+        for layer, w in zip(self.layers, weights):
+            layer.W = w["W"]
+            layer.b = w["b"]
     def forward(self, X):
         """
         Forward propagation through all layers.
