@@ -51,8 +51,8 @@ class NAG():
             self.v_b[layer_id]=np.zeros_like(layer.b)
         self.v_W[layer_id]=self.momentum*self.v_W[layer_id]+self.lr*layer.grad_W+self.lr*self.weight_decay*self.ori_W
         self.v_b[layer_id]=self.momentum*self.v_b[layer_id]+self.lr*layer.grad_b+self.lr*self.weight_decay*self.ori_b
-        layer.W=self.ori_W-self.v_W[layer_id]
-        layer.b=self.ori_b-self.v_b[layer_id]
+        layer.W=0
+        layer.b=0
 
 class RMSProp():
     def __init__(self,lr=0.001,decay=0.9,weight_decay=0,eps=1e-8):
@@ -69,5 +69,5 @@ class RMSProp():
             self.s_b[layer_id]=np.zeros_like(layer.b)
         self.s_W[layer_id]=self.decay*self.s_W[layer_id]+(1-self.decay)*(layer.grad_W+self.weight_decay*layer.W)**2
         self.s_b[layer_id]=self.decay*self.s_b[layer_id]+(1-self.decay)*(layer.grad_b+self.weight_decay*layer.b)**2
-        layer.W-=((self.lr*(layer.grad_W+self.weight_decay*layer.W))/(np.sqrt(self.s_W[layer_id])+self.eps))
-        layer.b-=((self.lr*(layer.grad_b+self.weight_decay*layer.b))/(np.sqrt(self.s_b[layer_id])+self.eps))
+        layer.W-=0
+        layer.b-=0
