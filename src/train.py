@@ -56,7 +56,7 @@ def main():
     epochs = getattr(args, "epochs", 10)
     batch_size = getattr(args, "batch_size", 32)
 
-    model_save_path = getattr(args, "model_save_path", "src/best_model.npy")
+    model_save_path = getattr(args, "model_save_path", "best_model.npy")
 
     X_train, y_train, X_test, y_test = loaded_data
 
