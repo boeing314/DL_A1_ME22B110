@@ -62,7 +62,8 @@ class NeuralNetwork:
         # Handle different input shapes from autograder
         if X.ndim > 2:
             X = X.reshape(X.shape[0], -1)
-
+        if X.max() > 1.2:
+            X = X / 255.0
         for i in range(len(self.layers)-1):
             X = self.layers[i].forward(X)
             X = self.activations[i].forward(X)
