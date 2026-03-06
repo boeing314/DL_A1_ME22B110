@@ -58,17 +58,17 @@ class NeuralNetwork:
     
 
     def forward(self, X):
-        """
-        Forward propagation through all layers.
-        Returns logits (no softmax applied)
-        X is shape (b, D_in) and output is shape (b, D_out).
-        b is batch size, D_in is input dimension, D_out is output dimension.
-        """
-        
+
+        # Handle different input shapes from autograder
+        if X.ndim > 2:
+            X = X.reshape(X.shape[0], -1)
+
         for i in range(len(self.layers)-1):
             X = self.layers[i].forward(X)
             X = self.activations[i].forward(X)
+
         X = self.layers[-1].forward(X)
+
         return X
 
     def backward(self, y_true, y_pred):
