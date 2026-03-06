@@ -12,16 +12,52 @@ class MSE:
         B=y_true.shape[0]
         return 2*(y_pred-y_true)/(B*N)
 
+import numpy as np
+
 class cross_entropy:
-    def forward(self,y_true,y_pred):
-        # We implement softmax and get the probability corresponding to each digit
-        exp_logits=np.exp(y_pred-np.max(y_pred,axis=1,keepdims=True))
-        self.probs=exp_logits/np.sum(exp_logits,axis=1,keepdims=True)
-        # We implement a categorical cross entropy loss as the classes are mutually exclusive
-        B=y_true.shape[0]
-        return -np.sum(y_true*np.log(self.probs+1e-12))/B
-    def backward(self,y_true,y_pred):
-        exp_logits=np.exp(y_pred-np.max(y_pred,axis=1,keepdims=True))
-        self.probs=exp_logits/np.sum(exp_logits,axis=1,keepdims=True)
-        B=y_true.shape[0]
-        return (self.probs-y_true)/B
+
+    def forward(self, y_true, y_pred):
+        """
+        y_pred : logits (B, C)
+        y_true : labels (B,) or one-hot (B, C)
+        """
+
+        # Convert integer labels to one-hot if needed
+        if y_true.ndim == 1:
+            y_true = np.eye(y_pred.shape[1])[y_true]
+
+        # Numerical stability trick
+        shifted_logits = y_pred - np.max(y_pred, axis=1, keepdims=True)
+
+        exp_logits = np.exp(shifted_logits)
+        self.probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
+
+        self.y_true = y_true
+
+        B = y_true.shape[0]
+
+        loss = -np.sum(y_true * np.log(self.probs + 1e-12)) / B
+
+        return loss
+
+
+    def backward(self, y_true, y_pred):
+        """
+        Gradient of loss w.r.t logits
+        """
+
+        # Convert integer labels to one-hot if needed
+        if y_true.ndim == 1:
+            y_true = np.eye(y_pred.shape[1])[y_true]
+        shifted_logits = y_pred - np.max(y_pred, axis=1, keepdims=True)
+
+        exp_logits = np.exp(shifted_logits)
+        self.probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
+
+        self.y_true = y_true
+
+        B = y_true.shape[0]
+
+        grad = (self.probs - y_true) / B
+
+        return grad
