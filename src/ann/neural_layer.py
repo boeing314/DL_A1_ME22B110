@@ -18,5 +18,5 @@ class NeuralLayer:
         return x@self.W+self.b
     def backward(self,grad_output):
         self.grad_W=(self.x.T@grad_output)
-        self.grad_b=np.sum(grad_output,axis=0,keepdims=True)
+        self.grad_b=np.sum(grad_output,axis=0)
         return grad_output@self.W.T
