@@ -56,24 +56,8 @@ class NeuralNetwork:
             self.activations.append(self.activation_map[self.activation]())
         self.layers.append(neural_layer.NeuralLayer(self.hidden_size[-1], self.output_size, self.weight_init))
     
-    def get_weights(self):
-        weights = []
 
-        for layer in self.layers:
-            weights.append({
-                "W": layer.W,
-                "b": layer.b
-            })
 
-        return weights
-
-    def set_weights(self, weights):
-        if weights is None:
-            raise ValueError("Weights cannot be None")
-
-        for layer, w in zip(self.layers, weights):
-            layer.W = w["W"]
-            layer.b = w["b"]
     def forward(self, X):
         """
         Forward propagation through all layers.
@@ -156,5 +140,19 @@ class NeuralNetwork:
         y_pred = self.forward(X)
         return self.loss_function.forward(y, y_pred)
 
+    def get_weights(self):
+        d = {}
+        for i, layer in enumerate(self.layers):
+            d[f"W{i}"] = layer.W.copy()
+            d[f"b{i}"] = layer.b.copy()
+        return d
 
+    def set_weights(self, weight_dict):
+        for i, layer in enumerate(self.layers):
+            w_key = f"W{i}"
+            b_key = f"b{i}"
+            if w_key in weight_dict:
+                layer.W = weight_dict[w_key].copy()
+            if b_key in weight_dict:
+                layer.b = weight_dict[b_key].copy()
 
