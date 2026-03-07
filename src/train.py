@@ -41,7 +41,7 @@ def parse_arguments():
     parser.add_argument("-w_i","--weight_init", type=str, default="xavier",choices=["xavier", "random","zero"])
     parser.add_argument("-w_p","--wandb_project", type=str, default="test_project")
     parser.add_argument("-w_rn","--wandb_run_name", type=str, default="run_test")
-    parser.add_argument("-msp","--model_save_path", type=str, default="src/best_model.npy")
+    
     
     return parser.parse_args()
 
