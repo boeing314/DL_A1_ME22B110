@@ -35,13 +35,13 @@ def parse_arguments():
     parser.add_argument("-o","--optimizer", type=str, default="sgd",choices=["sgd", "momentum", "nag", "rmsprop"])
     parser.add_argument("-lr","--learning_rate", type=float, default=0.01)
     parser.add_argument("-wd","--weight_decay", type=float, default=0)
-    parser.add_argument("-nhl","--num_layers", type=int, default=2)
-    parser.add_argument("-sz","--hidden_size", nargs="+", default=["128","128"])
+    parser.add_argument("-nhl","--num_layers", type=int, default=4)
+    parser.add_argument("-sz","--hidden_size", nargs="+", default=["128","128","128","128"])
     parser.add_argument("-a","--activation", type=str, default="relu",choices=["relu", "sigmoid", "tanh"])
     parser.add_argument("-w_i","--weight_init", type=str, default="xavier",choices=["xavier", "random","zero"])
     parser.add_argument("-w_p","--wandb_project", type=str, default="test_project")
     parser.add_argument("-w_rn","--wandb_run_name", type=str, default="run_test")
-    parser.add_argument("-msp","--model_save_path", type=str, default="src/best_model.npy")
+    parser.add_argument("-msp","--model_save_path", type=str, default="src/test_model.npy")
     
     return parser.parse_args()
 
