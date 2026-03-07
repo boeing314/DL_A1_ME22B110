@@ -67,7 +67,7 @@ def main():
 
     X_train, y_train, X_val, y_val = load_data(dataset)
 
-    model = NeuralNetwork(args)
+    '''model = NeuralNetwork(args)
 
     model.train(X_train, y_train)
 
@@ -85,7 +85,14 @@ def main():
         os.makedirs(dir_path, exist_ok=True)
     np.save(model_save_path, weights)
 
-    print("Training complete")
+    print("Training complete")'''
+
+    table = wandb.Table(columns=["class", "image"])
+
+    for i in range(10):
+        idx = np.where(y_train == i)[0][0]
+        img = X_train[idx].reshape(28, 28)
+        table.add_data(i, wandb.Image(img))
 
 
 
