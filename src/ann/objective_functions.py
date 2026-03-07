@@ -12,8 +12,6 @@ class MSE:
         B=y_true.shape[0]
         return 2*(y_pred-y_true)/(B*N)
 
-import numpy as np
-
 class cross_entropy:
 
     def forward(self, y_true, y_pred):
