@@ -10,6 +10,8 @@ class NeuralLayer:
         self.variance=2/(input_size+output_size)
         if weight_init=='xavier':
             self.W=np.random.randn(input_size,output_size)*np.sqrt(self.variance)
+        elif weight_init=='zero':
+            self.W=np.zeros((input_size,output_size))  
         else:
             self.W=np.random.randn(input_size,output_size)*0.01
         self.b=np.zeros((1,output_size))

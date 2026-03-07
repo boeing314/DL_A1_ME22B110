@@ -19,10 +19,10 @@ def parse_arguments():
     parser.add_argument("-nhl","--num_layers", type=int, default=2)
     parser.add_argument("-sz","--hidden_size", type=int, nargs="+", default=[128,128])
     parser.add_argument("-a","--activation", type=str, default="relu",choices=["relu", "sigmoid", "tanh"])
-    parser.add_argument("-w_i","--weight_init", type=str, default="xavier",choices=["xavier", "random"])
+    parser.add_argument("-w_i","--weight_init", type=str, default="xavier",choices=["xavier", "random","zero"])
     parser.add_argument("-w_p","--wandb_project", type=str, default="test_project")
     parser.add_argument("-w_rn","--wandb_run_name", type=str, default="run_test")
-    parser.add_argument("-mlp","--model_load_path", type=str, default="best_model.npy")
+    parser.add_argument("-mlp","--model_load_path", type=str, default="src/best_model.npy")
     
 
     return parser.parse_args()
