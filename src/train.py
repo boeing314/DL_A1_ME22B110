@@ -29,17 +29,17 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(description='Train a neural network')
     parser.add_argument("-d","--dataset", type=str, default="mnist",choices=["mnist", "fashion_mnist"])
-    parser.add_argument("-e","--epochs", type=int, default=10)
+    parser.add_argument("-e","--epochs", type=int, default=30)
     parser.add_argument("-b","--batch_size", type=int, default=32)
     parser.add_argument("-l","--loss", type=str, default="cross_entropy",choices=["cross_entropy", "mse"])
     parser.add_argument("-o","--optimizer", type=str, default="sgd",choices=["sgd", "momentum", "nag", "rmsprop"])
-    parser.add_argument("-lr","--learning_rate", type=float, default=0.01)
+    parser.add_argument("-lr","--learning_rate", type=float, default=0.05)
     parser.add_argument("-wd","--weight_decay", type=float, default=0)
-    parser.add_argument("-nhl","--num_layers", type=int, default=4)
-    parser.add_argument("-sz","--hidden_size", nargs="+", default=["128","128","128","128"])
+    parser.add_argument("-nhl","--num_layers", type=int, default=2)
+    parser.add_argument("-sz","--hidden_size", nargs="+", default=["128","128"])
     parser.add_argument("-a","--activation", type=str, default="relu",choices=["relu", "sigmoid", "tanh"])
     parser.add_argument("-w_i","--weight_init", type=str, default="xavier",choices=["xavier", "random","zero"])
-    parser.add_argument("-w_p","--wandb_project", type=str, default="test_project")
+    parser.add_argument("-w_p","--wandb_project", type=str, default="dl_a1")
     parser.add_argument("-w_rn","--wandb_run_name", type=str, default="run_test")
     parser.add_argument("-msp","--model_save_path", type=str, default="src/test_model.npy")
     
@@ -61,20 +61,27 @@ def main():
     else:
         args.hidden_size = [int(x) for x in args.hidden_size]
     args.num_layers = len(args.hidden_size)
-    wandb.init(project=args.wandb_project, name=args.wandb_run_name,config=vars(args))
+    wandb.init(project=args.wandb_project, group='test_group', name=args.wandb_run_name,config=vars(args))
     dataset = getattr(args, "dataset")
     model_save_path = getattr(args, "model_save_path", "sample_model.npy")
 
     X_train, y_train, X_val, y_val = load_data(dataset)
+    '''
+    args.epochs = 1
+    model = NeuralNetwork(args)
+    for epoch in range(20):
+        
+        model.train(X_train, y_train)
+        val_metrics = model.evaluate(X_val, y_val)
+        val_loss= val_metrics["loss"]
+        print(val_loss)
+        wandb.log({"val_loss": val_loss,"epoch": epoch+1})
+    train_metrics = model.evaluate(X_train, y_train)
 
-    '''model = NeuralNetwork(args)
-
+    '''
+    model = NeuralNetwork(args)
     model.train(X_train, y_train)
-
-    val_metrics = model.evaluate(X_val, y_val)
-
-    
-    wandb.log({"val_loss": val_metrics["loss"], "val_accuracy": val_metrics["accuracy"], "val_precision": val_metrics["precision"], "val_recall": val_metrics["recall"], "val_f1": val_metrics["f1"]})
+    wandb.log({"val_loss": val_metrics["loss"], "val_accuracy": val_metrics["accuracy"], "val_precision": val_metrics["precision"], "val_recall": val_metrics["recall"], "val_f1": val_metrics["f1"],"train_accuracy": train_metrics["accuracy"],"train_f1": train_metrics["f1"],"train_loss": train_metrics["loss"]})
 
     weights = model.get_weights()
 
@@ -85,16 +92,24 @@ def main():
         os.makedirs(dir_path, exist_ok=True)
     np.save(model_save_path, weights)
 
-    print("Training complete")'''
-
+    print("Training complete")
+'''
     table = wandb.Table(columns=["class", "image"])
 
     for i in range(10):
-        idx = np.where(y_train == i)[0][0]
-        img = X_train[idx].reshape(28, 28)
-        table.add_data(i, wandb.Image(img))
-
-
+        idxs = np.where(y_train == i)[0][:5]
+        for idx in idxs:
+            img = X_train[idx].reshape(28, 28)
+            table.add_data(i, wandb.Image(img))
+    wandb.log({"sample_images": table})
+'''
+'''
+    for i in [2,4,6,8]:
+        args.num_layers = i
+        args.hidden_size = [128]*(i+1)
+        model = NeuralNetwork(args)
+        model.train(X_train, y_train)
+'''
 
 if __name__ == '__main__':
     main()

@@ -1,3 +1,6 @@
+project: dl_a1
+entity: me22b110-iit-madras
+
 program: src/train.py
 
 method: random
@@ -12,7 +15,7 @@ parameters:
     values: ["sgd", "momentum", "nag", "rmsprop"]
 
   learning_rate:
-    values: [0.1, 0.01, 0.001]
+    values: [0.1, 0.01, 0.001, 0.0005]
 
   batch_size:
     values: [32, 64, 128]
@@ -23,7 +26,8 @@ parameters:
   hidden_size:
     values:
       - "64,64"
+      - "64,64,64"
+      - "64,64,64,64,64"
       - "128,128"
       - "128,128,128"
-      - "128,128,128,128,128,128"
-      - "256,256"
+      - "128,128,128,128,128"

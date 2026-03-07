@@ -109,6 +109,7 @@ class NeuralNetwork:
     def train(self, X_train, y_train, epochs=1, batch_size=32):
         epochs=self.epochs
         batch_size=self.batch_size
+        norm_grad=0
         for epoch in range(epochs):
             loss_epoch=0
             total_samples=0
@@ -136,7 +137,10 @@ class NeuralNetwork:
                 self.backward(y_batch, y_pred)
                 self.update_weights()
             print(f"Loss: {avg_loss:.6f}")
+
             wandb.log({"epoch": epoch+1, "loss": avg_loss})
+            #norm_grad=np.linalg.norm(self.layers[0].grad_W)
+            #wandb.log({"first_layer_grad_norm_avg": norm_grad, "epoch":epoch+1})
 
     def evaluate(self, X, y):
         logits=self.forward(X)
@@ -172,6 +176,7 @@ class NeuralNetwork:
         precision=np.mean(precision_i)
         recall=np.mean(recall_i)
         f1=np.mean(f1_i)
+        wandb.log({"confusion_matrix": wandb.plot.confusion_matrix(y_true=y_true,preds=y_pred,class_names=[str(i) for i in range(10)])})
         d={
             "logits": logits,
             "loss": loss,

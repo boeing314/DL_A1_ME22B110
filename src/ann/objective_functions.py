@@ -6,11 +6,15 @@ import numpy as np
 
 class MSE:
     def forward(self,y_true,y_pred):
+        if y_true.ndim == 1:
+            y_true = np.eye(y_pred.shape[1])[y_true]
         return np.mean((y_true-y_pred)**2)
     def backward(self,y_true,y_pred):
+        if y_true.ndim == 1:
+            y_true = np.eye(y_pred.shape[1])[y_true]
         N=y_true.shape[1]
         B=y_true.shape[0]
-        return 2*(y_pred-y_true)/(B*N)
+        return 2*(y_pred-y_true)/(B)
 
 class cross_entropy:
 

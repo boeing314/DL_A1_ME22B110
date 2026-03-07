@@ -4,6 +4,7 @@ import ast
 from ann.neural_network import NeuralNetwork
 from utils.data_loader import load_data
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import wandb
 
 
 def parse_arguments():
@@ -14,15 +15,15 @@ def parse_arguments():
     parser.add_argument("-b","--batch_size", type=int, default=32)
     parser.add_argument("-l","--loss", type=str, default="cross_entropy",choices=["cross_entropy", "mse"])
     parser.add_argument("-o","--optimizer", type=str, default="sgd",choices=["sgd", "momentum", "nag", "rmsprop"])
-    parser.add_argument("-lr","--learning_rate", type=float, default=0.01)
+    parser.add_argument("-lr","--learning_rate", type=float, default=0.001)
     parser.add_argument("-wd","--weight_decay", type=float, default=0)
-    parser.add_argument("-nhl","--num_layers", type=int, default=4)
-    parser.add_argument("-sz","--hidden_size", type=int, nargs="+", default=[128,128,128,128])
+    parser.add_argument("-nhl","--num_layers", type=int, default=2)
+    parser.add_argument("-sz","--hidden_size", type=int, nargs="+", default=[128,128])
     parser.add_argument("-a","--activation", type=str, default="relu",choices=["relu", "sigmoid", "tanh"])
     parser.add_argument("-w_i","--weight_init", type=str, default="xavier",choices=["xavier", "random","zero"])
     parser.add_argument("-w_p","--wandb_project", type=str, default="test_project")
     parser.add_argument("-w_rn","--wandb_run_name", type=str, default="run_test")
-
+    parser.add_argument("-mlp","--model_load_path", type=str, default="src/test_model.npy")
     
 
     return parser.parse_args()
@@ -46,6 +47,7 @@ def main():
     args = parse_arguments()
     dataset = getattr(args, "dataset")
     X_train, y_train, X_test, y_test = load_data(dataset)
+    wandb.init(project=args.wandb_project, group='test_group', name=args.wandb_run_name,config=vars(args))
     model = NeuralNetwork(args)
     weights = load_model(args.model_load_path)
     model.set_weights(weights)
