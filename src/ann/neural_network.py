@@ -135,7 +135,7 @@ class NeuralNetwork:
                 avg_loss = loss_epoch / total_samples
                 self.backward(y_batch, y_pred)
                 self.update_weights()
-            print(f"Loss: {avg_loss:.4f}")
+            print(f"Loss: {avg_loss:.6f}")
             wandb.log({"epoch": epoch+1, "loss": avg_loss})
 
     def evaluate(self, X, y):
