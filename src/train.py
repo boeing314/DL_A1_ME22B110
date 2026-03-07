@@ -36,7 +36,7 @@ def parse_arguments():
     parser.add_argument("-lr","--learning_rate", type=float, default=0.01)
     parser.add_argument("-wd","--weight_decay", type=float, default=0)
     parser.add_argument("-nhl","--num_layers", type=int, default=2)
-    parser.add_argument("-sz","--hidden_size", type=int, nargs="+", default=[128,128])
+    parser.add_argument("-sz","--hidden_size", nargs="+", default=["128","128"])
     parser.add_argument("-a","--activation", type=str, default="relu",choices=["relu", "sigmoid", "tanh"])
     parser.add_argument("-w_i","--weight_init", type=str, default="xavier",choices=["xavier", "random"])
     parser.add_argument("-w_p","--wandb_project", type=str, default="test_project")
@@ -54,7 +54,13 @@ def load_model(model_path):
 
 def main():
     args = parse_arguments()
-
+    print('yes')
+    print(args.hidden_size)
+    if len(args.hidden_size) == 1 and "," in args.hidden_size[0]:
+        args.hidden_size = [int(x) for x in args.hidden_size[0].split(",")]
+    else:
+        args.hidden_size = [int(x) for x in args.hidden_size]
+    args.num_layers = len(args.hidden_size)
     wandb.init(project=args.wandb_project, name=args.wandb_run_name,config=vars(args))
     dataset = getattr(args, "dataset")
     model_save_path = getattr(args, "model_save_path", "sample_model.npy")
@@ -65,7 +71,7 @@ def main():
 
     model.train(X_train, y_train)
 
-   val_metrics = model.evaluate(X_val, y_val)
+    val_metrics = model.evaluate(X_val, y_val)
 
     
     wandb.log({"val_loss": val_metrics["loss"], "val_accuracy": val_metrics["accuracy"], "val_precision": val_metrics["precision"], "val_recall": val_metrics["recall"], "val_f1": val_metrics["f1"]})

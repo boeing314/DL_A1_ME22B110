@@ -38,10 +38,12 @@ class NAG():
         self.momentum=momentum
         self.v_W={}
         self.v_b={}
+        self.ori_W={}
+        self.ori_b={}
     def lookahead(self,layer):
         layer_id=id(layer)
-        self.ori_W=layer.W.copy()
-        self.ori_b=layer.b.copy()
+        self.ori_W[layer_id]=layer.W.copy()
+        self.ori_b[layer_id]=layer.b.copy()
         if layer_id not in self.v_W:
             self.v_W[layer_id]=layer.W*0.0
             self.v_b[layer_id]=layer.b*0.0
@@ -52,10 +54,10 @@ class NAG():
         if layer_id not in self.v_W:
             self.v_W[layer_id]=layer.W*0.0
             self.v_b[layer_id]=layer.b*0.0
-        self.v_W[layer_id]=self.momentum*self.v_W[layer_id]+self.lr*layer.grad_W+self.lr*self.weight_decay*self.ori_W
+        self.v_W[layer_id]=self.momentum*self.v_W[layer_id]+self.lr*layer.grad_W+self.lr*self.weight_decay*self.ori_W[layer_id]
         self.v_b[layer_id]=self.momentum*self.v_b[layer_id]+self.lr*layer.grad_b
-        layer.W=self.ori_W-self.v_W[layer_id]
-        layer.b=self.ori_b-self.v_b[layer_id]
+        layer.W=self.ori_W[layer_id]-self.v_W[layer_id]
+        layer.b=self.ori_b[layer_id]-self.v_b[layer_id]
 
 class RMSProp():
     def __init__(self,lr=0.001,decay=0.9,weight_decay=0,eps=1e-8):
